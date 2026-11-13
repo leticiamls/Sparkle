@@ -16,6 +16,9 @@ struct SparkleModel: Identifiable {
 }
 
 class ViewController: UIViewController {
+    var sparkles: [SparkleModel] = [
+    ]
+    
     let greetingsView: UILabel = {
         let label = UILabel()
         label.text = "Bom dia, Kyle!"
@@ -48,13 +51,7 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let sparkleCardView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 20
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+    let sparkleCardView = SparkleCardView()
     
     let sparkleTitleView: UILabel = {
         let label = UILabel()
@@ -124,6 +121,14 @@ class ViewController: UIViewController {
     
     @objc func buttonClicked() {
         let sheet = AddSparkleSheetViewController()
+        
+        sheet.toSave = { [weak self] newSparkle in
+            self?.sparkles.append(newSparkle)
+            
+            self?.sparkleTitleView.text = newSparkle.name
+            print("Lista atual de sparkles:")
+        }
+        
         if let sheet = sheet.sheetPresentationController {
             sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
@@ -133,7 +138,6 @@ class ViewController: UIViewController {
     
     func configurarLayout() {
         view.addSubview(sparkleCardView)
-        sparkleCardView.addSubview(sparkleTitleView)
         view.addSubview(greetingsView)
         view.addSubview(textDateView)
         view.addSubview(addButton)
@@ -144,9 +148,6 @@ class ViewController: UIViewController {
             sparkleCardView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             sparkleCardView.widthAnchor.constraint(equalToConstant: 345),
             sparkleCardView.heightAnchor.constraint(equalToConstant: 88),
-            
-            sparkleTitleView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sparkleTitleView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             greetingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),

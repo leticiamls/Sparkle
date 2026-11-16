@@ -13,15 +13,17 @@ class SparkleModel: Identifiable {
     var id: String = UUID().uuidString
     var name: String
     var classification: String
-    var reminder: Date
+    var reminder: String
     var repetition: String
+    var startDate: Date
     var isDone: Bool = false
     
-    init(name: String, classification: String, reminder: Date, repetition: String, isDone: Bool = false) {
+    init(name: String, classification: String, reminder: String, repetition: String, startDate: Date, isDone: Bool = false) {
         self.name = name
         self.classification = classification
         self.reminder = reminder
         self .repetition = repetition
+        self .startDate = startDate
         self.isDone = isDone
     }
 }

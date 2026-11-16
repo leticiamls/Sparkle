@@ -1,14 +1,49 @@
 //
-//  Untitled.swift
+//  SparkleSheet.swift
 //  Sparkle
 //
 //  Created by Letícia Marreiro Lopes Silva on 11/11/26.
 //
 import UIKit
 
-class SparkleSheet: UIViewController {
+// MARK: - Enums
+enum SparkleCategory: String, CaseIterable, Identifiable {
+    case cabelo = "Cabelo"
+    case pele = "Pele"
+    case unhas = "Unhas"
+    
+    var id: Self { self }
+}
+
+enum SparkleRepetition: String, CaseIterable, Identifiable {
+    case diariamente = "Diariamente"
+    case semanalmente = "Semanalmente"
+    case aCadaDuasSemanas = "A Cada 2 Semanas"
+    case mensalmente = "Mensalmente"
+    case anualmente = "Anualmente"
+    
+    var id: Self { self }
+}
+
+enum SparkleReminder: String, CaseIterable, Identifiable {
+    case desativado = "Desativado"
+    case meiaHoraAntes = "Meia hora antes"
+    case umDiaAntes = "Um dia antes"
+    case doisDiasAntes = "Dois dias antes"
+    
+    var id: Self { self }
+}
+
+// MARK: - SparkleSheet
+class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     var toSave: ((SparkleModel) -> Void)?
+    
+    private var typedName: String = ""
+    private var selectedCategory: SparkleCategory = .cabelo
+    private var selectedRepetition: SparkleRepetition = .diariamente
+    private var selectedStartDate: Date = Date()
+    private var selectedReminder: SparkleReminder = .desativado
     
     static let labelColor = UIColor(red: 89/255.0, green: 61/255.0, blue: 96/255.0, alpha: 1.0)
     static let buttonLabelColor = UIColor(red: 163/255.0, green: 76/255.0, blue: 117/255.0, alpha: 1.0)
@@ -22,136 +57,18 @@ class SparkleSheet: UIViewController {
         return label
     }()
     
-    let cards: UIStackView = {
-        let stack = UIStackView()
-        stack.alignment = .fill
-        stack.spacing = 20
-        stack.axis = .vertical
-        stack.distribution = .fillEqually
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    let inputCard: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 24
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let secondInputCard: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 24
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let separatorLine: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray5
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let secondSeparatorLine: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray5
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let sparkleName: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Nome"
-        textField.layer.cornerRadius = 26
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        return textField
-    }()
-    
-    let sparkleClassification: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.title = "Selecionar"
-        config.baseForegroundColor = buttonLabelColor
-        
-        let button = UIButton(configuration: config)
-        
-        button.menu = UIMenu(children: [
-            UIAction(title: "Cabelo", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            }),
-            UIAction(title: "Pele", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            }),
-            UIAction(title: "Unhas", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            })
-        ])
-        
-        button.showsMenuAsPrimaryAction = true
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    let sparkleRepetition: UIButton = {
-        var config = UIButton.Configuration.plain()
-        config.title = "Selecionar"
-        config.baseForegroundColor = buttonLabelColor
-        
-        let button = UIButton(configuration: config)
-        
-        button.menu = UIMenu(children: [
-            UIAction(title: "Diariamente", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            }),
-            UIAction(title: "Semanalmente", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            }),
-            UIAction(title: "Quinzenalmente", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            }),
-            UIAction(title: "Mensalmente", handler: { action in
-                button.setTitle(action.title, for: .normal)
-            })
-        ])
-        
-        button.showsMenuAsPrimaryAction = true
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    let sparkleReminder: UIDatePicker = {
-        let date = UIDatePicker()
-        date.translatesAutoresizingMaskIntoConstraints = false
-        return date
-    }()
-    
-    let reminderLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Lembrete"
-        label.font = .systemFont(ofSize: 16)
-        label.textColor = labelColor
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let categoryLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Categoria"
-        label.font = .systemFont(ofSize: 16)
-        label.textColor = labelColor
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let repetitionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Repetição"
-        label.font = .systemFont(ofSize: 16)
-        label.textColor = labelColor
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    private lazy var tableView: UITableView = {
+        let table = UITableView(frame: .zero, style: .insetGrouped)
+        table.backgroundColor = .clear
+        table.isScrollEnabled = false
+        table.rowHeight = 64
+        table.dataSource = self
+        table.delegate = self
+        table.register(SparkleTextFieldCell.self, forCellReuseIdentifier: SparkleTextFieldCell.identifier)
+        table.register(SparkleMenuPickerCell.self, forCellReuseIdentifier: SparkleMenuPickerCell.identifier)
+        table.register(SparkleStartDate.self, forCellReuseIdentifier: SparkleStartDate.identifier)
+        table.translatesAutoresizingMaskIntoConstraints = false
+        return table
     }()
     
     let saveButton: UIButton = {
@@ -175,16 +92,106 @@ class SparkleSheet: UIViewController {
     
     @objc func saveSparkle() {
         let newSparkle = SparkleModel(
-            name: sparkleName.text ?? "",
-            classification: sparkleClassification.currentTitle ?? "Selecionar",
-            reminder: sparkleReminder.date,
-            repetition: sparkleRepetition.currentTitle ?? "Definir"
+            name: typedName,
+            classification: selectedCategory.rawValue,
+            reminder: selectedReminder.rawValue,
+            repetition: selectedRepetition.rawValue,
+            startDate: selectedStartDate
         )
-        print("Sparkle Salvo")
+        print("Sparkle Salvo com sucesso!")
         toSave?(newSparkle)
         dismiss(animated: true)
     }
     
+    // MARK: - UITableViewDataSource
+    func numberOfSections(in tableView: UITableView) -> Int {
+        2 // Duas caixas agrupadas (insetGrouped)
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        switch section {
+        case 0: return 2 // Nome e Categoria
+        case 1: return 3 // Repetição, Data de Início e Lembrete
+        default: return 0
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch (indexPath.section, indexPath.row) {
+        case (0, 0):
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: SparkleTextFieldCell.identifier,
+                for: indexPath
+            ) as! SparkleTextFieldCell
+            cell.onTextChanged = { [weak self] text in
+                self?.typedName = text
+            }
+            return cell
+            
+        case (0, 1):
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: SparkleMenuPickerCell.identifier,
+                for: indexPath
+            ) as! SparkleMenuPickerCell
+            cell.configure(
+                title: "Categoria",
+                options: SparkleCategory.allCases.map { $0.rawValue },
+                initialSelected: selectedCategory.rawValue
+            )
+            cell.onOptionSelected = { [weak self] selected in
+                if let category = SparkleCategory(rawValue: selected) {
+                    self?.selectedCategory = category
+                }
+            }
+            return cell
+            
+        case (1, 0):
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: SparkleMenuPickerCell.identifier,
+                for: indexPath
+            ) as! SparkleMenuPickerCell
+            cell.configure(
+                title: "Repetição",
+                options: SparkleRepetition.allCases.map { $0.rawValue },
+                initialSelected: selectedRepetition.rawValue
+            )
+            cell.onOptionSelected = { [weak self] selected in
+                if let repetition = SparkleRepetition(rawValue: selected) {
+                    self?.selectedRepetition = repetition
+                }
+            }
+            return cell
+            
+        case (1, 1):
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: SparkleStartDate.identifier,
+                for: indexPath
+            ) as! SparkleStartDate
+            cell.onDateChanged = { [weak self] date in
+                self?.selectedStartDate = date
+            }
+            return cell
+            
+        default: // case (1, 2) - Lembrete como Menu Picker
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: SparkleMenuPickerCell.identifier,
+                for: indexPath
+            ) as! SparkleMenuPickerCell
+            cell.configure(
+                title: "Lembrete",
+                options: SparkleReminder.allCases.map { $0.rawValue },
+                initialSelected: selectedReminder.rawValue
+            )
+            cell.onOptionSelected = { [weak self] selected in
+                if let reminder = SparkleReminder(rawValue: selected) {
+                    self?.selectedReminder = reminder
+                }
+            }
+            return cell
+        }
+    }
+    
+    // MARK: - Gradientes e Layout
     func aplicarGradiente() {
         let gradientLayer = CAGradientLayer()
         gradientLayer.frame = view.bounds
@@ -235,76 +242,163 @@ class SparkleSheet: UIViewController {
     
     func configurarLayout() {
         view.addSubview(sheetTitle)
-        view.addSubview(cards)
-        cards.addArrangedSubview(inputCard)
-        cards.addArrangedSubview(secondInputCard)
-        
-        inputCard.addSubview(sparkleName)
-        inputCard.addSubview(separatorLine)
-        inputCard.addSubview(sparkleClassification)
-        inputCard.addSubview(categoryLabel)
-        
-        secondInputCard.addSubview(sparkleRepetition)
-        secondInputCard.addSubview(secondSeparatorLine)
-        secondInputCard.addSubview(sparkleReminder)
-        secondInputCard.addSubview(repetitionLabel)
-        secondInputCard.addSubview(reminderLabel)
-        
+        view.addSubview(tableView)
         view.addSubview(saveButton)
         
         NSLayoutConstraint.activate([
             sheetTitle.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 70),
             sheetTitle.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
             
-            cards.topAnchor.constraint(equalTo: sheetTitle.bottomAnchor, constant: 40),
-            cards.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            cards.widthAnchor.constraint(equalToConstant: 345),
-            
-            inputCard.heightAnchor.constraint(equalToConstant: 128),
-            
-            sparkleName.topAnchor.constraint(equalTo: inputCard.topAnchor),
-            sparkleName.leadingAnchor.constraint(equalTo: inputCard.leadingAnchor, constant: 20),
-            sparkleName.trailingAnchor.constraint(equalTo: inputCard.trailingAnchor, constant: -20),
-            sparkleName.heightAnchor.constraint(equalToConstant: 64),
-            
-            separatorLine.topAnchor.constraint(equalTo: sparkleName.bottomAnchor),
-            separatorLine.leadingAnchor.constraint(equalTo: inputCard.leadingAnchor, constant: 16),
-            separatorLine.trailingAnchor.constraint(equalTo: inputCard.trailingAnchor, constant: -16),
-            separatorLine.heightAnchor.constraint(equalToConstant: 1),
-            
-            sparkleClassification.topAnchor.constraint(equalTo: sparkleName.bottomAnchor),
-            sparkleClassification.trailingAnchor.constraint(equalTo: inputCard.trailingAnchor, constant: -5),
-            sparkleClassification.heightAnchor.constraint(equalToConstant: 64),
-            
-            categoryLabel.centerYAnchor.constraint(equalTo: sparkleClassification.centerYAnchor),
-            categoryLabel.leadingAnchor.constraint(equalTo: inputCard.leadingAnchor, constant: 20),
-            
-            secondInputCard.heightAnchor.constraint(equalToConstant: 128),
-            
-            sparkleRepetition.topAnchor.constraint(equalTo: secondInputCard.topAnchor),
-            sparkleRepetition.trailingAnchor.constraint(equalTo: secondInputCard.trailingAnchor, constant: -20),
-            sparkleRepetition.heightAnchor.constraint(equalToConstant: 64),
-            
-            repetitionLabel.centerYAnchor.constraint(equalTo: sparkleRepetition.centerYAnchor),
-            repetitionLabel.leadingAnchor.constraint(equalTo: secondInputCard.leadingAnchor, constant: 20),
-            
-            secondSeparatorLine.topAnchor.constraint(equalTo: sparkleRepetition.bottomAnchor),
-            secondSeparatorLine.leadingAnchor.constraint(equalTo: secondInputCard.leadingAnchor, constant: 16),
-            secondSeparatorLine.trailingAnchor.constraint(equalTo: secondInputCard.trailingAnchor, constant: -16),
-            secondSeparatorLine.heightAnchor.constraint(equalToConstant: 1),
-            
-            sparkleReminder.topAnchor.constraint(equalTo: sparkleRepetition.bottomAnchor),
-            sparkleReminder.trailingAnchor.constraint(equalTo: secondInputCard.trailingAnchor, constant: -5),
-            sparkleReminder.heightAnchor.constraint(equalToConstant: 64),
-            
-            reminderLabel.centerYAnchor.constraint(equalTo: sparkleReminder.centerYAnchor),
-            reminderLabel.leadingAnchor.constraint(equalTo: secondInputCard.leadingAnchor, constant: 20),
+            tableView.topAnchor.constraint(equalTo: sheetTitle.bottomAnchor, constant: 20),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4),
+            tableView.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -20),
             
             saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             saveButton.widthAnchor.constraint(equalToConstant: 345),
             saveButton.heightAnchor.constraint(equalToConstant: 52)
         ])
+    }
+}
+
+// MARK: - Células da Tabela
+final class SparkleMenuPickerCell: UITableViewCell {
+    static let identifier = "SparkleMenuPickerCell"
+    var onOptionSelected: ((String) -> Void)?
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16)
+        label.textColor = SparkleSheet.labelColor
+        return label
+    }()
+    
+    private lazy var selectionButton: UIButton = {
+        let button = UIButton(configuration: .plain())
+        button.configuration?.baseForegroundColor = SparkleSheet.buttonLabelColor
+        button.showsMenuAsPrimaryAction = true
+        button.changesSelectionAsPrimaryAction = true
+        return button
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
+        backgroundColor = .white
+        
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, selectionButton])
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.distribution = .equalSpacing
+        
+        contentView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
+            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(title: String, options: [String], initialSelected: String) {
+        titleLabel.text = title
+        selectionButton.configuration?.title = initialSelected
+        selectionButton.menu = UIMenu(
+            children: options.map { option in
+                UIAction(
+                    title: option,
+                    state: initialSelected == option ? .on : .off
+                ) { [weak self] _ in
+                    self?.onOptionSelected?(option)
+                }
+            }
+        )
+    }
+}
+
+final class SparkleTextFieldCell: UITableViewCell {
+    static let identifier = "SparkleTextFieldCell"
+    var onTextChanged: ((String) -> Void)?
+    
+    private lazy var textField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Nome"
+        tf.font = .systemFont(ofSize: 16)
+        tf.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
+        backgroundColor = .white
+        contentView.addSubview(textField)
+        
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
+            textField.topAnchor.constraint(equalTo: contentView.topAnchor),
+            textField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc private func textDidChange() {
+        onTextChanged?(textField.text ?? "")
+    }
+}
+
+final class SparkleStartDate: UITableViewCell {
+    static let identifier = "SparkleStartDate"
+    var onDateChanged: ((Date) -> Void)?
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Data de início"
+        label.font = .systemFont(ofSize: 16)
+        label.textColor = SparkleSheet.labelColor
+        return label
+    }()
+    
+    private lazy var datePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.addAction(UIAction { [weak self] _ in
+            guard let self = self else { return }
+            self.onDateChanged?(self.datePicker.date)
+        }, for: .valueChanged)
+        return picker
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
+        backgroundColor = .white
+        
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, datePicker])
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.distribution = .equalSpacing
+        
+        contentView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
+            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 

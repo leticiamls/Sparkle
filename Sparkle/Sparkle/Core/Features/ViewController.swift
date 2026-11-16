@@ -133,9 +133,6 @@ class ViewController: UIViewController {
         
         
         NSLayoutConstraint.activate([
-            sparkleList.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sparkleList.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
             greetingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
             
@@ -146,7 +143,10 @@ class ViewController: UIViewController {
             addButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
             
             addButton.widthAnchor.constraint(equalToConstant: 48),
-            addButton.heightAnchor.constraint(equalToConstant: 48)
+            addButton.heightAnchor.constraint(equalToConstant: 48),
+            
+            sparkleList.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            sparkleList.topAnchor.constraint(equalTo: textDateView.bottomAnchor, constant: 30),
         ])
     }
 }

@@ -8,6 +8,8 @@ import UIKit
 
 class SparkleCardView: UIView {
     
+    var loadState: ((Bool) -> Void)?
+    
     let sparkleTitleView: UILabel = {
         let label = UILabel()
         label.text = "Pintar Unhas"
@@ -24,6 +26,7 @@ class SparkleCardView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         configurarCard()
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
@@ -54,9 +57,15 @@ class SparkleCardView: UIView {
         ])
     }
     
+    func load(com sparkle: SparkleModel) {
+        sparkleTitleView.text = sparkle.name
+        icon.defineColor(para: sparkle.classification)
+        todoCheckbox.isChecked = sparkle.isDone
+    }
+    
     private func setupBindings() {
         todoCheckbox.onToggle = { isChecked in
-            print("Feito")
+            self.loadState?(isChecked)
         }
     }
 }

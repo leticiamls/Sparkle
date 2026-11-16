@@ -6,7 +6,7 @@
 //
 import UIKit
 
-class AddSparkleSheetViewController: UIViewController {
+class SparkleSheet: UIViewController {
     
     var toSave: ((SparkleModel) -> Void)?
     
@@ -309,5 +309,5 @@ class AddSparkleSheetViewController: UIViewController {
 }
 
 #Preview {
-    AddSparkleSheetViewController()
+    SparkleSheet()
 }

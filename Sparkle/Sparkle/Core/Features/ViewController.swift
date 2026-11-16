@@ -7,17 +7,8 @@
 
 import UIKit
 
-struct SparkleModel: Identifiable {
-    var id: String = UUID().uuidString
-    var name: String
-    var classification: String
-    var reminder: Date
-    var repetition: String
-}
-
 class ViewController: UIViewController {
-    var sparkles: [SparkleModel] = [
-    ]
+    var sparkles: [SparkleModel] = []
     
     let greetingsView: UILabel = {
         let label = UILabel()
@@ -51,7 +42,7 @@ class ViewController: UIViewController {
         return label
     }()
     
-    let sparkleCardView = SparkleCardView()
+    let sparkleList = SparkleListView()
     
     let sparkleTitleView: UILabel = {
         let label = UILabel()
@@ -80,6 +71,7 @@ class ViewController: UIViewController {
         
         view.layer.insertSublayer(gradientLayer, at: 0)
     }
+    
     func aplicarGradienteNoBotao() {
         let gradientLayer = CAGradientLayer()
         
@@ -120,13 +112,10 @@ class ViewController: UIViewController {
     }
     
     @objc func buttonClicked() {
-        let sheet = AddSparkleSheetViewController()
+        let sheet = SparkleSheet()
         
         sheet.toSave = { [weak self] newSparkle in
-            self?.sparkles.append(newSparkle)
-            
-            self?.sparkleTitleView.text = newSparkle.name
-            print("Lista atual de sparkles:")
+            self?.sparkleList.addSparkle(newSparkle)
         }
         
         if let sheet = sheet.sheetPresentationController {
@@ -137,17 +126,15 @@ class ViewController: UIViewController {
     }
     
     func configurarLayout() {
-        view.addSubview(sparkleCardView)
+        view.addSubview(sparkleList)
         view.addSubview(greetingsView)
         view.addSubview(textDateView)
         view.addSubview(addButton)
         
         
         NSLayoutConstraint.activate([
-            sparkleCardView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sparkleCardView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            sparkleCardView.widthAnchor.constraint(equalToConstant: 345),
-            sparkleCardView.heightAnchor.constraint(equalToConstant: 88),
+            sparkleList.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            sparkleList.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             greetingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),

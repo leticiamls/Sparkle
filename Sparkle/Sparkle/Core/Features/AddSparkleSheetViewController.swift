@@ -8,6 +8,8 @@ import UIKit
 
 class AddSparkleSheetViewController: UIViewController {
     
+    var toSave: ((SparkleModel) -> Void)?
+    
     static let labelColor = UIColor(red: 89/255.0, green: 61/255.0, blue: 96/255.0, alpha: 1.0)
     static let buttonLabelColor = UIColor(red: 163/255.0, green: 76/255.0, blue: 117/255.0, alpha: 1.0)
     
@@ -156,7 +158,6 @@ class AddSparkleSheetViewController: UIViewController {
         var config = UIButton.Configuration.plain()
         config.title = "Salvar"
         config.baseForegroundColor = .white
-        
         let button = UIButton(configuration: config)
         button.layer.cornerRadius = 26
         button.clipsToBounds = true
@@ -169,6 +170,19 @@ class AddSparkleSheetViewController: UIViewController {
         aplicarGradiente()
         aplicarGradienteNoBotao()
         configurarLayout()
+        saveButton.addTarget(self, action: #selector(saveSparkle), for: .touchUpInside)
+    }
+    
+    @objc func saveSparkle() {
+        let newSparkle = SparkleModel(
+            name: sparkleName.text ?? "",
+            classification: sparkleClassification.currentTitle ?? "Selecionar",
+            reminder: sparkleReminder.date,
+            repetition: sparkleRepetition.currentTitle ?? "Definir"
+        )
+        print("Sparkle Salvo")
+        toSave?(newSparkle)
+        dismiss(animated: true)
     }
     
     func aplicarGradiente() {

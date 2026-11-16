@@ -10,7 +10,7 @@ import SwiftData
 
 class SparkleListView: UIView {
     
-    let container = try? ModelContainer(for: SparkleModel.self)
+    private let repository = SparkleRepository()
     
     let stackView: UIStackView = {
         let stack = UIStackView()
@@ -44,18 +44,12 @@ class SparkleListView: UIView {
     }
     
     func addSparkle(_ newSparkle: SparkleModel) {
-        container?.mainContext.insert(newSparkle)
-        try? container?.mainContext.save()
-        
-        let card = SparkleCardView()
-        card.load(com: newSparkle)
-        stackView.addArrangedSubview(card)
+        repository.insert(newSparkle)
+        createCardOnStack(para: newSparkle)
     }
     
     func loadSavedSparkles() {
-        let descriptor = FetchDescriptor<SparkleModel>()
-        guard let saved = try? container?.mainContext.fetch(descriptor) else { return }
-        
+        let saved = repository.fetchAll()
         for sparkle in saved {
             createCardOnStack(para: sparkle)
         }
@@ -64,10 +58,23 @@ class SparkleListView: UIView {
     private func createCardOnStack(para sparkle: SparkleModel) {
         let card = SparkleCardView()
         card.load(com: sparkle)
+        
         card.loadState = { [weak self] isChecked in
             sparkle.isDone = isChecked
-            try? self?.container?.mainContext.save()
+            self?.repository.save()
         }
+        
+        card.onDelete = { [weak self, weak card] in
+            guard let self = self, let card = card else { return }
+            self.repository.delete(sparkle)
+            
+            UIView.animate(withDuration: 0.25) {
+                self.stackView.removeArrangedSubview(card)
+                card.removeFromSuperview()
+                self.stackView.layoutIfNeeded()
+            }
+        }
+        
         stackView.addArrangedSubview(card)
     }
 }

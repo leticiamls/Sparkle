@@ -44,6 +44,8 @@ class ViewController: UIViewController {
     
     let sparkleList = SparkleListView()
     
+    let dayPickerStackView = DayPickerStackView()
+    
     let sparkleTitleView: UILabel = {
         let label = UILabel()
         label.text = "Pintar Unhas"
@@ -102,6 +104,10 @@ class ViewController: UIViewController {
         
         configurarLayout()
         addButton.addTarget(self, action: #selector(buttonClicked), for: .touchUpInside)
+        
+        dayPickerStackView.onDateSelected = { [weak self] selectedDate in
+            self?.sparkleList.loadSavedSparkles(para: selectedDate)
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -126,27 +132,32 @@ class ViewController: UIViewController {
     }
     
     func configurarLayout() {
-        view.addSubview(sparkleList)
         view.addSubview(greetingsView)
         view.addSubview(textDateView)
+        view.addSubview(dayPickerStackView)
         view.addSubview(addButton)
+        view.addSubview(sparkleList)
+        
         
         
         NSLayoutConstraint.activate([
             greetingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
+            greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             
             textDateView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            textDateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 64),
+            textDateView.topAnchor.constraint(equalTo: greetingsView.bottomAnchor),
+            
+            dayPickerStackView.topAnchor.constraint(equalTo: textDateView.bottomAnchor, constant: 35),
+            dayPickerStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            addButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
+            addButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             
             addButton.widthAnchor.constraint(equalToConstant: 48),
             addButton.heightAnchor.constraint(equalToConstant: 48),
             
             sparkleList.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sparkleList.topAnchor.constraint(equalTo: textDateView.bottomAnchor, constant: 30),
+            sparkleList.topAnchor.constraint(equalTo: dayPickerStackView.bottomAnchor, constant: 30),
         ])
     }
 }

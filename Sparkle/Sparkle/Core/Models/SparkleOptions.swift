@@ -17,6 +17,7 @@ enum SparkleCategory: String, CaseIterable, Identifiable {
 
 enum SparkleRepetition: String, CaseIterable, Identifiable {
     case diariamente = "Diariamente"
+    case aCadaDoisDias = "A Cada 2 Dias"
     case semanalmente = "Semanalmente"
     case aCadaDuasSemanas = "A Cada 2 Semanas"
     case mensalmente = "Mensalmente"

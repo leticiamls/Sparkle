@@ -11,6 +11,7 @@ import SwiftData
 class SparkleListView: UIView {
     
     private let repository = SparkleRepository()
+    private var currentDate: Date = Date()
     
     let stackView: UIStackView = {
         let stack = UIStackView()
@@ -45,13 +46,24 @@ class SparkleListView: UIView {
     
     func addSparkle(_ newSparkle: SparkleModel) {
         repository.insert(newSparkle)
-        createCardOnStack(para: newSparkle)
+        
+        if newSparkle.shouldAppear(em: currentDate) {
+            createCardOnStack(para: newSparkle)
+        }
     }
     
-    func loadSavedSparkles() {
+    func loadSavedSparkles(para date: Date = Date()) {
+        currentDate = date
         let saved = repository.fetchAll()
+        for view in stackView.arrangedSubviews {
+                stackView.removeArrangedSubview(view)
+                view.removeFromSuperview()
+            }
+        
         for sparkle in saved {
-            createCardOnStack(para: sparkle)
+            if sparkle.shouldAppear(em: currentDate){
+                createCardOnStack(para: sparkle)
+            }
         }
     }
     

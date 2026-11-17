@@ -99,6 +99,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad(){
         super.viewDidLoad()
+        navigationController?.setNavigationBarHidden(true, animated: false)
         aplicarGradiente()
         aplicarGradienteNoBotao()
         
@@ -142,16 +143,16 @@ class ViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             greetingsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            greetingsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
             
             textDateView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            textDateView.topAnchor.constraint(equalTo: greetingsView.bottomAnchor),
+            textDateView.topAnchor.constraint(equalTo: greetingsView.bottomAnchor, constant: 4),
             
             dayPickerStackView.topAnchor.constraint(equalTo: textDateView.bottomAnchor, constant: 35),
             dayPickerStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            addButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            addButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 29),
             
             addButton.widthAnchor.constraint(equalToConstant: 48),
             addButton.heightAnchor.constraint(equalToConstant: 48),

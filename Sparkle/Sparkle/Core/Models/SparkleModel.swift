@@ -17,6 +17,8 @@ class SparkleModel: Identifiable {
     var repetition: String
     var startDate: Date
     var isDone: Bool = false
+    var excludedDates: [Date] = []
+    var endDate: Date? = nil
     
     func shouldAppear(em targetDate: Date = Date()) -> Bool {
         let calendar = Calendar.current
@@ -25,6 +27,14 @@ class SparkleModel: Identifiable {
         let target = calendar.startOfDay(for: targetDate)
         
         if target < start {
+            return false
+        }
+        
+        if let endDate = endDate, target >= calendar.startOfDay(for: endDate) {
+            return false
+        }
+        
+        if excludedDates.contains(where: {calendar.isDate($0, inSameDayAs: target)}) {
             return false
         }
         

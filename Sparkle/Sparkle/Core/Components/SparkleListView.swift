@@ -56,9 +56,9 @@ class SparkleListView: UIView {
         currentDate = date
         let saved = repository.fetchAll()
         for view in stackView.arrangedSubviews {
-                stackView.removeArrangedSubview(view)
-                view.removeFromSuperview()
-            }
+            stackView.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
         
         for sparkle in saved {
             if sparkle.shouldAppear(em: currentDate){
@@ -78,17 +78,58 @@ class SparkleListView: UIView {
         
         card.onDelete = { [weak self, weak card] in
             guard let self = self, let card = card else { return }
+            self.presentDeleteAlert(for: sparkle, card: card)
+        }
+        
+        stackView.addArrangedSubview(card)
+    }
+    
+    private func presentDeleteAlert(for sparkle: SparkleModel, card: SparkleCardView) {
+        let alert = UIAlertController(
+            title: "Apagar Sparkle recorrente",
+            message: nil,
+            preferredStyle: .alert
+        )
+        
+        // 1. Apenas este evento
+        alert.addAction(UIAlertAction(title: "Apenas este evento", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            sparkle.excludedDates.append(self.currentDate)
+            self.repository.save()
+            self.removeCardFromStack(card)
+        })
+        
+        // 2. Este e os próximos eventos
+        alert.addAction(UIAlertAction(title: "Este e os próximos eventos", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            sparkle.endDate = Calendar.current.startOfDay(for: self.currentDate)
+            self.repository.save()
+            self.removeCardFromStack(card)
+        })
+        
+        // 3. Todos os eventos
+        alert.addAction(UIAlertAction(title: "Todos os eventos", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
             self.repository.delete(sparkle)
-            
+            self.removeCardFromStack(card)
+        })
+        
+        // 4. Cancelar
+        alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel) { _ in
+            card.resetSwipe()
+        })
+        
+        window?.rootViewController?.present(alert, animated: true)
+    }
+    
+    private func removeCardFromStack(_ card: SparkleCardView) {
+        card.animateRemoval { [weak self] in
+            guard let self = self else { return }
             UIView.animate(withDuration: 0.25) {
                 self.stackView.removeArrangedSubview(card)
                 card.removeFromSuperview()
                 self.stackView.layoutIfNeeded()
             }
         }
-        
-        stackView.addArrangedSubview(card)
     }
 }
-
-

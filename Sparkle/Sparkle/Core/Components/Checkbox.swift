@@ -14,7 +14,7 @@ final class Checkbox: UIButton {
         didSet { isSelected = isChecked }
     }
 
-    var checkedColor: UIColor = .systemBlue {
+    var checkedColor: UIColor = .clear {
         didSet { setNeedsUpdateConfiguration() }
     }
 
@@ -62,14 +62,15 @@ final class Checkbox: UIButton {
         self.configurationUpdateHandler = { [weak self] button in
             guard let self = self else { return }
             var updatedConfig = button.configuration
-
+            
             let symbolName = button.isSelected ? "checkmark.circle.fill" : "circle"
             let iconColor = button.isSelected ? self.checkedColor : self.uncheckedColor
-
+            
             updatedConfig?.baseForegroundColor = self.titleColor
             updatedConfig?.image = UIImage(systemName: symbolName)?
                 .withTintColor(iconColor, renderingMode: .alwaysOriginal)
-
+            updatedConfig?.background.backgroundColor = .clear
+            
             button.configuration = updatedConfig
         }
     }
@@ -82,4 +83,8 @@ final class Checkbox: UIButton {
             self.onToggle?(self.isChecked)
         }, for: .touchUpInside)
     }
+}
+
+#Preview {
+    Checkbox()
 }

@@ -6,7 +6,7 @@
 //
 import UIKit
 
-final class SparkleTextFieldCell: UITableViewCell {
+final class SparkleTextFieldCell: UITableViewCell, UITextFieldDelegate {
     static let identifier = "SparkleTextFieldCell"
     var onTextChanged: ((String) -> Void)?
     
@@ -14,6 +14,8 @@ final class SparkleTextFieldCell: UITableViewCell {
         let tf = UITextField()
         tf.placeholder = "Nome"
         tf.font = .systemFont(ofSize: 16)
+        tf.returnKeyType = .done
+        tf.delegate = self
         tf.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
@@ -39,5 +41,10 @@ final class SparkleTextFieldCell: UITableViewCell {
     
     @objc private func textDidChange() {
         onTextChanged?(textField.text ?? "")
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }

@@ -8,14 +8,24 @@ import Foundation
 import SwiftData
 
 class SparkleRepository {
-    let container: ModelContainer? = {
+    static let sharedContainer: ModelContainer? = {
         do {
             return try ModelContainer(for: SparkleModel.self)
         } catch {
-            print("Erro ao criar o modelContainer: \(error)")
-            return nil
+            print("Banco antigo incompatível detectado, recriando store: \(error)")
+            // Apaga o default.store antigo incompatível (inclusive no #Preview) e recria
+            let storeURL = URL.applicationSupportDirectory.appending(path: "default.store")
+            for ext in ["", "-shm", "-wal"] {
+                let fileURL = URL(filePath: storeURL.path() + ext)
+                try? FileManager.default.removeItem(at: fileURL)
+            }
+            return try? ModelContainer(for: SparkleModel.self)
         }
     }()
+    
+    var container: ModelContainer? {
+        Self.sharedContainer
+    }
     
     func fetchAll() -> [SparkleModel] {
         let descriptor = FetchDescriptor<SparkleModel>()

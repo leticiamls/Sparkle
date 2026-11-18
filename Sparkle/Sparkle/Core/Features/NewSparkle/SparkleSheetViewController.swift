@@ -5,9 +5,12 @@
 //  Created by Letícia Marreiro Lopes Silva on 11/11/26.
 //
 import UIKit
+import SwiftData
 
 // MARK: - SparkleSheet
 class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    
+    private let remindersManager = ReminderIntegrationManager()
     
     var toSave: ((SparkleModel) -> Void)?
     
@@ -82,7 +85,35 @@ class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate
         )
         print("Sparkle Salvo com sucesso!")
         toSave?(newSparkle)
+        
+        if let alarmDate = calculateReminderDate() {
+            ReminderIntegrationManager.shared.saveReminder(
+                title: newSparkle.name,
+                dueDate: alarmDate,
+                repetition: selectedRepetition
+            ) { savedId, error in
+                if let savedId = savedId {
+                    newSparkle.reminderId = savedId
+                    try? SparkleRepository.sharedContainer?.mainContext.save()
+                }
+            }
+        }
+        
         dismiss(animated: true)
+    }
+    
+    private func calculateReminderDate() -> Date?{
+        let calendar = Calendar.current
+        switch selectedReminder {
+        case .desativado:
+            return nil
+        case .meiaHoraAntes:
+            return calendar.date(byAdding: .minute, value: -30, to: selectedStartDate)
+        case .umDiaAntes:
+            return calendar.date(byAdding: .day, value: -1, to: selectedStartDate)
+        case .doisDiasAntes:
+            return calendar.date(byAdding: .day, value: -2, to: selectedStartDate)
+        }
     }
     
     // MARK: - UITableViewDataSource

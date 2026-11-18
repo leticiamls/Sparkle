@@ -20,6 +20,7 @@ class SparkleModel: Identifiable {
     var excludedDates: [Date] = []
     var endDate: Date? = nil
     var completedDates: [Date] = []
+    var reminderId: String? = nil
     
     func shouldAppear(em targetDate: Date = Date()) -> Bool {
         let calendar = Calendar.current

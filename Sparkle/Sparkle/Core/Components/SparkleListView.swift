@@ -104,6 +104,7 @@ class SparkleListView: UIView {
         alert.addAction(UIAlertAction(title: "Este e os próximos eventos", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             sparkle.endDate = Calendar.current.startOfDay(for: self.currentDate)
+            ReminderIntegrationManager.shared.deleteReminder(withId: sparkle.reminderId)
             self.repository.save()
             self.removeCardFromStack(card)
         })
@@ -111,6 +112,7 @@ class SparkleListView: UIView {
         // Todos os eventos
         alert.addAction(UIAlertAction(title: "Todos os eventos", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
+            ReminderIntegrationManager.shared.deleteReminder(withId: sparkle.reminderId)
             self.repository.delete(sparkle)
             self.removeCardFromStack(card)
         })

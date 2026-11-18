@@ -8,6 +8,9 @@
 import UIKit
 
 class ViewController: UIViewController {
+    
+    private let remindersManager = ReminderIntegrationManager()
+    
     var sparkles: [SparkleModel] = []
     
     let greetingsView: UILabel = {
@@ -161,6 +164,8 @@ class ViewController: UIViewController {
             greetingsView.text = "\(greeting), \(name)!"
         }
     }
+    
+    
     
     @objc private func userName() {
         let alert = UIAlertController(

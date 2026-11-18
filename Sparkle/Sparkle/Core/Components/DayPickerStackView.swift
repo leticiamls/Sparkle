@@ -11,8 +11,8 @@ class DayPickerStackView: UIView {
     private var currentCards: [DayPickerCardView] = []
     private var nextCards: [DayPickerCardView] = []
     
-    // Largura de 1 semana (7 cards de 45 + 6 espaços de 6 = 351) + 16 de espaço entre semanas
-    private let pageOffset: CGFloat = 351 + 16
+    // Largura de 1 semana (7 cards de 45 + 6 espaços de 6 = 351) + 36 de espaço entre semanas
+    private let pageOffset: CGFloat = 351 + 36
     
     // Container que segura as 3 semanas lado a lado e desliza com o dedo
     private let carouselContainer: UIView = {

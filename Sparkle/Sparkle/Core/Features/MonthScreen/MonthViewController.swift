@@ -81,39 +81,13 @@ class MonthViewController: UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(true, animated: false)
-        addButton.aplicarGradienteNoBotao()
         
         configurarLayout()
-        addButton.addTarget(self, action: #selector(buttonClicked), for: .touchUpInside)
         
         calendarView.delegate = self
         
-        dayPickerStackView.onDateSelected = { [weak self] selectedDate in
-            self?.sparkleList.loadSavedSparkles(para: selectedDate)
-        }
         let selection = UICalendarSelectionSingleDate(delegate: self)
         calendarView.selectionBehavior = selection
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if let gradientLayer = addButton.layer.sublayers?.first as? CAGradientLayer {
-            gradientLayer.frame = addButton.bounds
-        }
-    }
-    
-    @objc func buttonClicked() {
-        let sheet = SparkleSheet()
-        
-        sheet.toSave = { [weak self] newSparkle in
-            self?.sparkleList.addSparkle(newSparkle)
-        }
-        
-        if let sheet = sheet.sheetPresentationController {
-            sheet.detents = [.large()]
-            sheet.prefersGrabberVisible = true
-        }
-        present(sheet, animated: true)
     }
     
     func configurarLayout() {
@@ -172,16 +146,20 @@ class MonthViewController: UIViewController {
 
 extension MonthViewController: UICalendarViewDelegate {
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-        return nil // Retorne nil por enquanto, ou adicione a lógica da bolinha aqui depois
+        return nil
     }
 }
 
 extension MonthViewController: UICalendarSelectionSingleDateDelegate {
     
-    // A assinatura desta função deve ser EXATAMENTE esta:
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
         
         guard let selectedDate = dateComponents?.date else { return }
+        
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        formatter.locale = Locale.current
+        textDateView.text = formatter.string(from: selectedDate)
         
         sparkleList.loadSavedSparkles(para: selectedDate)
     }

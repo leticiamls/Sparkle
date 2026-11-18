@@ -93,10 +93,10 @@ class SparkleCardView: UIView {
         ])
     }
     
-    func load(com sparkle: SparkleModel) {
+    func load(com sparkle: SparkleModel, data: Date) {
         sparkleTitleView.text = sparkle.name
         icon.defineColor(para: sparkle.classification)
-        todoCheckbox.isChecked = sparkle.isDone
+        todoCheckbox.isChecked = sparkle.isCompleted(em: data)
     }
     
     private func setupBindings() {

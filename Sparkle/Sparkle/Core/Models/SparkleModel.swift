@@ -19,6 +19,7 @@ class SparkleModel: Identifiable {
     var isDone: Bool = false
     var excludedDates: [Date] = []
     var endDate: Date? = nil
+    var completedDates: [Date] = []
     
     func shouldAppear(em targetDate: Date = Date()) -> Bool {
         let calendar = Calendar.current
@@ -67,6 +68,18 @@ class SparkleModel: Identifiable {
             return pastDays == 0
         }
     }
+    
+    func isCompleted(em date: Date) -> Bool {
+            completedDates.contains { Calendar.current.isDate($0, inSameDayAs: date) }
+        }
+    
+    func setCompleted(_ completed: Bool, em date: Date) {
+            let day = Calendar.current.startOfDay(for: date)
+            completedDates.removeAll { Calendar.current.isDate($0, inSameDayAs: day) }
+            if completed {
+                completedDates.append(day)
+            }
+        }
     
     init(name: String, classification: String, reminder: String, repetition: String, startDate: Date, isDone: Bool = false) {
         self.name = name

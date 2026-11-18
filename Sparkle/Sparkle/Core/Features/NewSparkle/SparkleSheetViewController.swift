@@ -11,7 +11,13 @@ class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     var toSave: ((SparkleModel) -> Void)?
     
-    private var typedName: String = ""
+    private var typedName: String = "" {
+        didSet {
+            let sparkleHasName = !typedName.trimmingCharacters(in: .whitespaces).isEmpty
+            saveButton.isEnabled = sparkleHasName
+            saveButton.alpha = sparkleHasName ? 1.0 : 0.5
+        }
+    }
     private var selectedCategory: SparkleCategory = .cabelo
     private var selectedRepetition: SparkleRepetition = .diariamente
     private var selectedStartDate: Date = Date()
@@ -50,6 +56,8 @@ class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate
         let button = UIButton(configuration: config)
         button.layer.cornerRadius = 26
         button.clipsToBounds = true
+        button.isEnabled = false
+        button.alpha = 0.5
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -63,6 +71,8 @@ class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate
     }
     
     @objc func saveSparkle() {
+        let cleanName = typedName.trimmingCharacters(in: .whitespaces)
+        guard !cleanName.isEmpty else { return }
         let newSparkle = SparkleModel(
             name: typedName,
             classification: selectedCategory.rawValue,

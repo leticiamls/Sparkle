@@ -69,11 +69,12 @@ class SparkleListView: UIView {
     
     private func createCardOnStack(para sparkle: SparkleModel) {
         let card = SparkleCardView()
-        card.load(com: sparkle)
+        card.load(com: sparkle, data: currentDate)
         
         card.loadState = { [weak self] isChecked in
-            sparkle.isDone = isChecked
-            self?.repository.save()
+            guard let self = self else { return }
+            sparkle.setCompleted(isChecked, em: self.currentDate)
+            self.repository.save()
         }
         
         card.onDelete = { [weak self, weak card] in
@@ -91,7 +92,7 @@ class SparkleListView: UIView {
             preferredStyle: .alert
         )
         
-        // 1. Apenas este evento
+        // Apenas este evento
         alert.addAction(UIAlertAction(title: "Apenas este evento", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             sparkle.excludedDates.append(self.currentDate)
@@ -99,7 +100,7 @@ class SparkleListView: UIView {
             self.removeCardFromStack(card)
         })
         
-        // 2. Este e os próximos eventos
+        // Este e os próximos eventos
         alert.addAction(UIAlertAction(title: "Este e os próximos eventos", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             sparkle.endDate = Calendar.current.startOfDay(for: self.currentDate)
@@ -107,14 +108,14 @@ class SparkleListView: UIView {
             self.removeCardFromStack(card)
         })
         
-        // 3. Todos os eventos
+        // Todos os eventos
         alert.addAction(UIAlertAction(title: "Todos os eventos", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             self.repository.delete(sparkle)
             self.removeCardFromStack(card)
         })
         
-        // 4. Cancelar
+        // Cancelar
         alert.addAction(UIAlertAction(title: "Cancelar", style: .cancel) { _ in
             card.resetSwipe()
         })

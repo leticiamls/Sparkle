@@ -23,7 +23,7 @@ class SparkleSheet: UIViewController, UITableViewDataSource, UITableViewDelegate
     let sheetTitle: UILabel = {
         let label = UILabel()
         label.text = "Novo Sparkle"
-        label.font = .systemFont(ofSize: 34, weight: .semibold)
+        label.font = UIFont(name: "CormorantGaramond-SemiBold", size: 33)
         label.textColor = labelColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         let label = UILabel()
         label.text = "Bom dia, Kyle!"
         label.textColor = UIColor(red: 89/255.0, green: 61/255.0, blue: 96/255.0, alpha: 1.0)
-        label.font = .systemFont(ofSize: 33, weight: .bold)
+        label.font = UIFont(name: "CormorantGaramond-SemiBold", size: 33)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -46,6 +46,7 @@ class ViewController: UIViewController {
     
     let dayPickerStackView = DayPickerStackView()
     
+    
     let sparkleTitleView: UILabel = {
         let label = UILabel()
         label.text = "Pintar Unhas"
@@ -55,53 +56,16 @@ class ViewController: UIViewController {
         return label
     }()
     
-    func aplicarGradiente() {
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.frame = view.bounds
-        let softPinkColor = UIColor(red: 255/255.0, green: 226/255.0, blue: 238/255.0, alpha: 1.0)
-        let softPurple = UIColor(red: 249/255.0, green: 245/255.0, blue: 255/255.0, alpha: 1.0)
-        
-        gradientLayer.colors = [
-            softPinkColor.cgColor,
-            softPurple.cgColor,
-            UIColor.white.withAlphaComponent(1).cgColor,
-            softPinkColor.cgColor,
-        ]
-        
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
-        
-        view.layer.insertSublayer(gradientLayer, at: 0)
-    }
-    
-    func aplicarGradienteNoBotao() {
-        let gradientLayer = CAGradientLayer()
-        
-        gradientLayer.frame = addButton.bounds
-        
-        let rosaClaro = UIColor(red: 215/255.0, green: 137/255.0, blue: 169/255.0, alpha: 1.0)
-        let rosaMedio = UIColor(red: 197/255.0, green: 107/255.0, blue: 146/255.0, alpha: 1.0)
-        let rosaEscuro = UIColor(red: 182/255.0, green: 84/255.0, blue: 128/255.0, alpha: 1.0)
-        
-        gradientLayer.colors = [
-            rosaClaro.cgColor,
-            rosaMedio.cgColor,
-            rosaEscuro.cgColor
-        ]
-        
-        gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.0)
-        gradientLayer.endPoint = CGPoint(x: 0.0, y: 1.0)
-        
-        gradientLayer.cornerRadius = 24
-        
-        addButton.layer.insertSublayer(gradientLayer, at: 0)
-    }
-    
     override func viewDidLoad(){
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(true, animated: false)
-        aplicarGradiente()
-        aplicarGradienteNoBotao()
+        addButton.aplicarGradienteNoBotao()
+        for family in UIFont.familyNames {
+            print("Família: \(family)")
+            for name in UIFont.fontNames(forFamilyName: family) {
+                print("==> Nome interno para o código: \(name)")
+            }
+        }
         
         configurarLayout()
         addButton.addTarget(self, action: #selector(buttonClicked), for: .touchUpInside)
@@ -133,6 +97,7 @@ class ViewController: UIViewController {
     }
     
     func configurarLayout() {
+        view.aplicarGradiente()
         view.addSubview(greetingsView)
         view.addSubview(textDateView)
         view.addSubview(dayPickerStackView)

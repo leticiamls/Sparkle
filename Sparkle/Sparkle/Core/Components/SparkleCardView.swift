@@ -93,10 +93,10 @@ class SparkleCardView: UIView {
         ])
     }
     
-    func load(com sparkle: SparkleModel) {
+    func load(com sparkle: SparkleModel, data: Date) {
         sparkleTitleView.text = sparkle.name
         icon.defineColor(para: sparkle.classification)
-        todoCheckbox.isChecked = sparkle.isDone
+        todoCheckbox.isChecked = sparkle.isCompleted(em: data)
     }
     
     private func setupBindings() {
@@ -141,12 +141,22 @@ class SparkleCardView: UIView {
     }
     
     @objc private func confirmDelete() {
+        onDelete?()
+    }
+    
+    func animateRemoval(completion: @escaping () -> Void) {
         UIView.animate(withDuration: 0.2, animations: {
             self.cardContainerView.transform = CGAffineTransform(translationX: -self.bounds.width, y: 0)
             self.alpha = 0
         }, completion: { _ in
-            self.onDelete?()
+            completion()
         })
+    }
+    
+    func resetSwipe() {
+        UIView.animate(withDuration: 0.2) {
+            self.cardContainerView.transform = .identity
+        }
     }
 }
 
